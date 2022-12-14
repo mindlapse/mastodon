@@ -5,6 +5,7 @@ host     = ENV.fetch('LOCAL_DOMAIN') { "localhost:#{port}" }
 web_host = ENV.fetch('WEB_DOMAIN') { host }
 
 alternate_domains = ENV.fetch('ALTERNATE_DOMAINS') { '' }.split(/\s*,\s*/)
+alternate_ip_ranges = ENV.fetch('ALTERNATE_IP_RANGES') { '' }.split(/\s*,\s*/).map { |ip| IPAddr.new ip }
 
 Rails.application.configure do
   https = Rails.env.production? || ENV['LOCAL_HTTPS'] == 'true'
@@ -31,6 +32,9 @@ Rails.application.configure do
     config.hosts << host if host.present?
     config.hosts << web_host if web_host.present?
     config.hosts.concat(alternate_domains) if alternate_domains.present?
+    config.hosts.concat(alternate_ip_ranges) if alternate_ip_ranges.present?
     config.host_authorization = { exclude: ->(request) { request.path == '/health' } }
   end
+
+  puts("Config #{config.inspect}")
 end
